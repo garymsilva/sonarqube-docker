@@ -1,0 +1,48 @@
+version: '3.6'
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    restart: always
+    volumes:
+      - ./_initdb:/docker-entrypoint-initdb.d
+      - db_data:/var/lib/postgresql/data
+    #
+    ports:
+      - "5432:5432"
+    #
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRES_MULTIPLE_DATABASES="sonarqube","postgres"
+    #
+  #
+  sonarqube:
+    image: sonarqube:lts-community
+    container_name: sonarqube
+    volumes:
+      - ./_sonarqube/data:/opt/sonarqube/data
+      - ./_sonarqube/extensions:/opt/sonarqube/extensions
+      - ./_sonarqube/logs:/opt/sonarqube/logs
+    #
+    ports:
+      - "8000:9000"
+    #
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/sonarqube
+      SONAR_JDBC_USERNAME: ${POSTGRESQL_USER}
+      SONAR_JDBC_PASSWORD: ${POSTGRESQL_PASSWORD}
+    #
+  #
+  sonar-scanner:
+    image: sonarsource/sonar-scanner-cli
+    container_name: sonar
+    environment:
+      SONAR_HOST_URL: http://sonarqube:9000
+      SONAR_LOGIN: admin
+      SONAR_PASSWORD: sonar
+    #
+  #
+#
+volumes:
+  db_data:
+#

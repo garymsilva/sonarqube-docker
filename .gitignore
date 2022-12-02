@@ -1,0 +1,2 @@
+/_sonarqube/*
+!/_sonarqube/.git-keep
